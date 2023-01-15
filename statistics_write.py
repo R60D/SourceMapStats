@@ -1,13 +1,12 @@
-import valve.source
-import valve.source.a2s
-import valve.source.master_server
+import sys
+sys.path.append("python-valve")
+import  valve.source
 import datetime
 import requests
 import socket
 import csv
 from time import time,sleep
 import re
-import sys
 #scan masterserver for ips, output address if it contains prefix=dr_
 def SlowScan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all"):
     format = '%Y-%m-%d-%H:%M:%S' # date format
@@ -20,7 +19,7 @@ def SlowScan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all"):
             for address in msq.find(gamedir=u"tf",empty=True,secure=True,region=regionserver):
                 print(address)
                 try:
-                    server = a2s.info(address,timeout=timeout_query)
+                    server = valve.source.a2s.info(address,timeout=timeout_query)
 
                     datastack = [address[0],address[1],server.map_name,server.player_count]
                     if prefix in datastack[2]:
@@ -31,7 +30,7 @@ def SlowScan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all"):
                         datastack.append(region)
                         ips.append(datastack)
                         x += 1
-                except (AttributeError,a2s.BrokenMessageError):
+                except (AttributeError,valve.source.a2s.BrokenMessageError):
                     y += 1
                 except socket.timeout:
                     z += 1
@@ -77,7 +76,7 @@ def Listscan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all",li
             fix_address = (address[0],int(address[1]))
             print(fix_address)
             try:
-                server = a2s.info(fix_address,timeout=timeout_query)
+                server = valve.source.a2s.info(fix_address,timeout=timeout_query)
 
                 datastack = [address[0],fix_address[1],server.map_name,server.player_count]
                 if prefix in datastack[2]:
@@ -88,7 +87,7 @@ def Listscan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all",li
                     datastack.append(region)
                     ips.append(datastack)
                     x += 1
-            except (AttributeError,a2s.BrokenMessageError):
+            except (AttributeError,valve.source.a2s.BrokenMessageError):
                 
                 
                 y += 1

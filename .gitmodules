@@ -1,0 +1,3 @@
+[submodule "python-valve"]
+	path = python-valve
+	url = https://github.com/serverstf/python-valve.git

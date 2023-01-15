@@ -1,6 +1,4 @@
-echo Creating VENV
-python -m venv VENV
-VENV\Scripts\activate.ps1
-pip install -r requirement.txt
+cd %~dp0
+pip install -r requirements.txt
 python main.py
 pause
