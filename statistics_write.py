@@ -1,12 +1,13 @@
 import valve.source
+import valve.source.a2s
 import valve.source.master_server
 import datetime
 import requests
 import socket
 import csv
-import a2s
 from time import time,sleep
 import re
+import sys
 #scan masterserver for ips, output address if it contains prefix=dr_
 def SlowScan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all"):
     format = '%Y-%m-%d-%H:%M:%S' # date format
