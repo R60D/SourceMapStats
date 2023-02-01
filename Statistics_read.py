@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import sys
 import numpy as np
 import csv
 import re
@@ -11,6 +12,13 @@ import copy
 #the fortmat of the csv is the following [ip,port,mapname,playercount,time,Region] [0,5]
 format = '%Y-%m-%d-%H:%M:%S' # date format
 file = "output.csv"
+
+def Read(file):#Uses old reading mehod
+    if(sys.prefix == sys.base_prefix):
+        print("Not running in virtual environment")
+    print("Running in virtual environment")
+    Reader(file)
+    input("Press Any Key To Exit...")
 
 #Shows the actual data as a plot
 def plotter(data):
