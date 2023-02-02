@@ -9,3 +9,5 @@ Untitled.ipynb
 *.lock
 *.sqlite
 *.json
+venv2/
+.vs/

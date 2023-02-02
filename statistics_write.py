@@ -1,25 +1,31 @@
 import sys
 import os
-#Manually adding submodule path from this path
-real = os.path.dirname(os.path.abspath(__file__))
-real2 = real+"\\"+"python-valve"
-print(real2)
-sys.path.append(real2)
-import valve.source
-import valve.source.master_server
 import a2s
-import valve.source.messages
-import valve.source.util
-
-
 import datetime
 import requests
 import socket
 import csv
 from time import time,sleep
-import re
+
+#Manually adding submodule path from this path
+real = os.path.dirname(os.path.abspath(__file__))
+real2 = real+"\\"+"python-valve"
+sys.path.append(real2)
+import valve.source
+import valve.source.master_server
+import valve.source.messages
+import valve.source.util
+
+#Parameters
+timeout_query = 1
+timeout_master = 1
+regionserver= "all"
+game="csgo" # cstrike,tf,hl2,hl2mp,csgo
+prefix = "dr_"
+file= "output.csv"
+
 #scan masterserver for ips, output address if it contains prefix=dr_
-def SlowScan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all"):
+def SlowScan():
     format = '%Y-%m-%d-%H:%M:%S' # date format
     x = 0 # number of "broken" servers print me to see it
     y = 0 # number of timed out servers
@@ -27,7 +33,7 @@ def SlowScan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all"):
     ips = []
     with valve.source.master_server.MasterServerQuerier(timeout=timeout_master) as msq:
         try:
-            for address in msq.find(gamedir=u"tf",empty=True,secure=True,region=regionserver):
+            for address in msq.find(gamedir=game,empty=True,secure=True,region=regionserver):
                 print(address)
                 try:
                     server = a2s.info(address,timeout=timeout_query)
@@ -45,7 +51,7 @@ def SlowScan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all"):
                     y += 1
                 except socket.timeout:
                     z += 1
-                print(f"{x}:deathrun servers {y}:server errors {z}:timeouts")
+                print(f"{x}:servers {y}:server errors {z}:timeouts")
 
             print("__________")
             print(ips)
@@ -53,7 +59,7 @@ def SlowScan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all"):
         except valve.source.NoResponseError:
             print("Master server request timed out!")
 # Writes input to csv use prefixcull for all servers
-def ProtoWriter(list,file="output.csv"):
+def ProtoWriter(list):
     try:
         with open(file,"r") as filedata:
             print("read successful")
@@ -65,7 +71,7 @@ def ProtoWriter(list,file="output.csv"):
             for ip in list:
                 csv.writer(filedata).writerow(ip)
 # Scans unique Ip's in .cvs file and appends new data to the list Much faster than scanning all the servers
-def FastScan(file="output.csv"):
+def FastScan():
     iplist = []
     with open(file,"r") as filedata:
         csvreader = csv.reader(filedata)
@@ -76,7 +82,7 @@ def FastScan(file="output.csv"):
             else:
                 print(f"{ip}:duplicate!!!!")
     return iplist
-def Listscan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all",list_ips=[]):
+def Listscan(list_ips=[]):
     format = '%Y-%m-%d-%H:%M:%S' # date format
     x = 0 # number of "broken" servers print me to see it
     y = 0 # number of timed out servers
@@ -104,7 +110,7 @@ def Listscan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all",li
                 y += 1
             except socket.timeout:
                 z += 1
-            print(f"{x}:deathrun servers {y}:server errors {z}:timeouts")
+            print(f"{x}:servers {y}:server errors {z}:timeouts")
 
         print("__________")
         print(ips)
@@ -112,30 +118,34 @@ def Listscan(prefix="dr_",timeout_master=1,timeout_query=1,regionserver="all",li
     except valve.source.NoResponseError:
         print("Master server request timed out!")
 # Runs in slow mode first to create initial server list, then in fast mode. Running in slowmode afterwards increase the sever pool that fast mode scans for.
-def MainWriter(isfast,file):
+def MainWriter(isfast):
     if isfast == True:
-        a = Listscan(list_ips=FastScan(file))
-        ProtoWriter(a,file)
+        a = Listscan(list_ips=FastScan())
+        ProtoWriter(a)
     elif isfast == False:
-        ProtoWriter(SlowScan(),file)
+        ProtoWriter(SlowScan())
     else:
         print("Invalid mode!!! please use Ex. MainWriter(True,filex)")
-
+# delay is time between each fast search
+# update is delay between each update where it looks for new servers. IT's very slow.
+# length determines how long the program runs for before automatically stopping. You can stop the program at any time.
 #Run MainWriter in fast/slow mode for n minutes
-def Iterator(file,delay=5,length=60,update=15):
+def Iterator(delay=5,length=60,update=15):
 
     end = time() + length*60
     x = update
     while time() < end:
         if x >= update:
             print("Initiate SLOW SEARCH")
-            MainWriter(False,file)
+            MainWriter(False)
             x = 0
         else:
             print("Initiate FAST SEARCH")
-            MainWriter(True,file)
+            MainWriter(True)
             x += 1
             sleep(delay*60)
 
     print(f"{length} : minutes complete")
 
+if __name__ == "__main__":#when launched directly.
+    Iterator()
